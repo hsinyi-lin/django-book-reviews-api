@@ -43,3 +43,48 @@ def add_review(request):
             ]
         }
     })
+
+
+@api_view(['PUT'])
+@user_login_required
+def edit_review(request, pk):
+    book_no = pk
+    user_id = request.session['user_id']
+    user_book = Book.objects.filter(no=book_no, user_id=user_id)
+    if not user_book.exists():
+        return Response({'result': False, 'message': '沒有此書'}, status=status.HTTP_404_NOT_FOUND)
+
+    data = request.data
+    serializer = BookReviewSerializer(data=data)
+    serializer.is_valid(raise_exception=True)
+    user_book.update(name=data['name'], title=data['title'], comment=data['comment'])
+
+    tags = BookTag.objects.filter(book_no=book_no)
+    tags.delete()
+
+    new_tags = []
+    book_tags = serializer.validated_data['book_tags']
+
+    for tag in book_tags:
+        tag_obj = BookTag(book_no=book_no, name=tag['tag_name'])
+        new_tags.append(tag_obj)
+    BookTag.objects.bulk_create(new_tags)
+
+    book = get_object_or_404(Book, pk=book_no)
+    tags = BookTag.objects.filter(book_no=book.pk)
+
+    return Response({
+        'success': True,
+        'data': {
+            'no': book.pk,
+            'user_id': book.user.pk,
+            'name': book.name,
+            'title': book.title,
+            'comment': book.comment,
+            'book_tags': [
+                {
+                    'tag_name': tag.name
+                } for tag in tags if tags.exists()
+            ]
+        }
+    })

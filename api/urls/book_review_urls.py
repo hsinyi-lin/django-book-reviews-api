@@ -7,4 +7,5 @@ app_name = 'book_review'
 
 urlpatterns = [
     path('add/', add_review, name='add'),
+    path('edit/<int:pk>/', edit_review, name='edit'),
 ]
