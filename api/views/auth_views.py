@@ -7,6 +7,7 @@ from rest_framework.response import Response
 
 from api.models import Account
 from api.serializers.auth_serializers import RegisterSerializer
+from api.utils.decorators import user_login_required
 
 
 @api_view(['POST'])
@@ -38,3 +39,9 @@ def login(request):
     except Account.DoesNotExist:
         return Response({'success': False, 'message': '帳號或密碼錯誤'}, status=status.HTTP_404_NOT_FOUND)
 
+
+@api_view(['POST'])
+@user_login_required
+def logout(request):
+    request.session.flush()
+    return Response({'success': True, 'message': '登出成功'})
