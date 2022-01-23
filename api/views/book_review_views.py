@@ -116,3 +116,20 @@ def get_all_reviews(request):
         ]
     })
 
+
+@api_view(['DELETE'])
+@user_login_required
+def delete_review(request, pk):
+    book_no = pk
+    user_id = request.session['user_id']
+    book = Book.objects.filter(no=book_no, user_id=user_id)
+    if not book.exists():
+        return Response({'success': False, 'message': '沒有此評論'}, status=status.HTTP_404_NOT_FOUND)
+
+    book_tags = BookTag.objects.filter(book_no=book_no)
+    book_tags.delete()
+    book.delete()
+
+    return Response({'success': True, 'message': '刪除成功'})
+
+
