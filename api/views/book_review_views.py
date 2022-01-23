@@ -70,7 +70,7 @@ def edit_review(request, pk):
         new_tags.append(tag_obj)
     BookTag.objects.bulk_create(new_tags)
 
-    book = get_object_or_404(Book, pk=book_no)
+    book = Book.objects.get(pk=book_no)
     tags = BookTag.objects.filter(book_no=book.pk)
 
     return Response({
